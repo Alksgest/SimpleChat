@@ -7,6 +7,7 @@ urlpatterns = [
     path('api/', views.api_root),
     path('api/chatRooms', views.ChatRoomList.as_view(), name='chatroom-list'),
     path('api/chatRooms/<int:pk>', views.ChatRoomDetails.as_view(), name='chatroom-detail'),
+    path('api/chatRooms/chat_room_redirect/', views.ChatRoomRedirect.as_view()),
     path('api/users/', views.UserList.as_view(), name='user-list'),
     path('api/users/<int:pk>', views.UserDetails.as_view(), name='user-detail'),
     path('api/messages', views.MessageList.as_view(), name='message-list'),

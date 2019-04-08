@@ -1,23 +1,37 @@
 from rest_framework import serializers
 
-from .models import *
-
+from .models import ChatRoom, Message, User
 
 class ChatRoomSerializer(serializers.ModelSerializer):
-    messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.all())
-    users = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.get(""" get users for this chat room """))
+    #messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.all())
+    messages_ids = serializers.SerializerMethodField()
+    users = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
-        fields = ('id', 'title')
+        fields = ('id', 'title', 'messages_ids', 'users')
+        
+    def get_messages_ids(self, chatRoom):
+        queryset = Message.objects.filter(chatRoom_id=chatRoom.id).values_list('id', flat=True).order_by('id')
+        return queryset
+    
+
+    def get_users(self, chatRoom):
+        queryset = Message.objects.filter(chatRoom_id=chatRoom.id)
+        return queryset
+
 
 class UserSerializer(serializers.ModelSerializer):
-    chatRooms = serializers.PrimaryKeyRelatedField(many=True, queryset=ChatRoom.objects.get(""" get chatrooms for this user """))
-    messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.get(""" get messages for this user """))
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'chatRooms')
+        fields = ('id', 'username', 'chatRooms', 'messages')
+
+    def get_messages(self, user):
+        queryset = Message.objects.filter(owner_id=user.id)
+        return queryset
+
 
 class MessageSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')

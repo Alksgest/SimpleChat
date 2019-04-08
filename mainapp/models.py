@@ -1,11 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+
 import random
 
 class ChatRoom(models.Model):
 
-    title = models.CharField(verbose_name='Title', max_length=30)
+    title = models.CharField(verbose_name='Title', max_length=30, unique=True)
     password = models.CharField(verbose_name='Password', max_length=24, default=str(random.randint(0, 9)) + str(random.randint(0, 9)) + str(random.randint(0, 9)))
 
     def generateRandomPassword(self):

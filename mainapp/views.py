@@ -1,6 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.http import HttpResponse, HttpResponsePermanentRedirect
+from django.http import HttpResponse, HttpResponsePermanentRedirect, HttpResponseNotFound
 from django.shortcuts import render
 from django.views.generic import FormView, TemplateView
 from rest_framework import generics, permissions
@@ -45,10 +45,19 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MessageList(generics.ListCreateAPIView):
-    queryset = Message.obejcts.all()
+    queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
     
 class MessageDetails(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Message.obejcts.all()
+    queryset = Message.objects.all()
     serializer_class = MessageSerializer
+
+class ChatRoomRedirect(generics.GenericAPIView):
+    def get(self, request, *args, **kwargs):
+        title = kwargs['title']
+        if title:
+            chatObj = ChatRoom.objects.get(title=title)
+            return HttpResponsePermanentRedirect(f'/api/chatRooms/{chatObj.id}')
+            
+        return HttpResponseNotFound()
