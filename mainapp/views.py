@@ -11,6 +11,7 @@ from rest_framework.reverse import reverse
 
 from .models import *
 from .serializers import *
+from .permissions import *
 
 from rest_framework.decorators import api_view
 
@@ -47,17 +48,38 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
 class MessageList(generics.ListCreateAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = (IsOwner, )
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     
 class MessageDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
+    permission_classes = (IsOwner, )
+    
+    def delete(self, request, *args, **kwargs):
+        pass
+
 
 class ChatRoomRedirect(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
-        title = kwargs['title']
-        if title:
-            chatObj = ChatRoom.objects.get(title=title)
+
+        title = request.GET.get('title', '')
+        password = request.GET.get('password', '')
+        
+        if title != '':
+            try:
+                chatObj = ChatRoom.objects.get(title=title)
+            except:
+                HttpResponseNotFound()
+            return HttpResponsePermanentRedirect(f'/api/chatRooms/{chatObj.id}')
+        elif password != '':
+            try:
+                chatObj = ChatRoom.objects.get(password=password)
+            except:
+                HttpResponseNotFound()
             return HttpResponsePermanentRedirect(f'/api/chatRooms/{chatObj.id}')
             
         return HttpResponseNotFound()

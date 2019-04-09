@@ -12,7 +12,7 @@ class ChatRoomSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'messages_ids', 'users')
         
     def get_messages_ids(self, chatRoom):
-        queryset = Message.objects.filter(chatRoom_id=chatRoom.id).values_list('id', flat=True).order_by('id')
+        queryset = Message.objects.filter(chatRoom_id=chatRoom.id)
         return queryset
     
 
@@ -36,7 +36,10 @@ class UserSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     chatRoom = serializers.ReadOnlyField(source='chatToom.title')
+    # owner = UserSerializer
+    # ChatRoom = ChatRoomSerializer
 
     class Meta:
         model = Message
         fields = ('id', 'message', 'date', 'owner', 'chatRoom')
+
