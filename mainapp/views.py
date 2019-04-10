@@ -20,7 +20,8 @@ from rest_framework.decorators import api_view
 def api_root(request, format=None):
     return Response({
         'chatRooms': reverse('chatroom-list', request=request, format=format),
-        'users': reverse('user-list', request=request, format=format)
+        'users': reverse('user-list', request=request, format=format),
+        'messages': reverse('message-list', request=request, format=format),
     })
 
 
