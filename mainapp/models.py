@@ -9,7 +9,7 @@ class ChatRoom(models.Model):
   
 
 class User(AbstractUser):
-    chatRooms = models.ManyToManyField(ChatRoom) # , through='UserChatRoomMembership'
+    chatRooms = models.ManyToManyField(ChatRoom, related_name='users') # , through='UserChatRoomMembership'
     #chatRoom = models.ForeignKey(ChatRoom, verbose_name='ChatRoom', related_name='users', on_delete=models.)
 
 class Message(models.Model):

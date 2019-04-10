@@ -5,7 +5,7 @@ from .models import ChatRoom, Message, User
 class ChatRoomSerializer(serializers.ModelSerializer):
     messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.all())
     #messages_ids = serializers.SerializerMethodField()
-    #users = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all())
+    users = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
@@ -16,10 +16,10 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     #     return queryset
     
 
-    # def get_users(self, chatRoom):
-    #     # queryset = User.objects.filter(chatRooms__id=chatRoom.id)
-    #     queryset = User.objects.all()
-    #     return queryset
+    def get_users(self, chatRoom):
+        # queryset = User.objects.filter(chatRooms__id=chatRoom.id)
+        #queryset = User.objects.all()
+        return [item.id for item in chatRoom.users.all()]
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,7 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
         queryset = ChatRoom.objects.filter(id__in=user.chatRooms.values_list('id'))
         #queryset = ChatRoom.objects.filter(id__in=[item.id for item in user.chatRooms.objects.all()])
         #queryset = ChatRoom.objects.all()
-        return queryset
+        return [item.id for item in user.chatRooms.all()]
         
 
     # def get_messages(self, user):
