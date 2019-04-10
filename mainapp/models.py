@@ -22,9 +22,9 @@ class User(AbstractUser):
 
 class Message(models.Model):
     message = models.TextField(verbose_name='Message')
-    date = models.DateTimeField(verbose_name='Date')
-    owner = models.ForeignKey(User, default=1, verbose_name="Owner", on_delete=models.CASCADE)
-    chatRoom = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE, verbose_name="ChatRoom")
+    #date = models.DateTimeField(verbose_name='Date')
+    # owner = models.ForeignKey(User, default=1, verbose_name="Owner", on_delete=models.CASCADE)
+    # chatRoom = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE, verbose_name="ChatRoom")
      #chatRoom = models.OneToOneField(ChatRoom, default=None, on_delete=models.CASCADE, null=True)
     
 
