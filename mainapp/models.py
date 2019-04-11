@@ -16,7 +16,7 @@ class Message(models.Model):
     message = models.TextField(verbose_name='Message')
     date = models.DateTimeField(verbose_name='Date', default=datetime.datetime.now()) #auto_now_add=True, blank=True
     owner = models.ForeignKey(User, default=1, verbose_name="Owner", on_delete=models.CASCADE, related_name="messages")
-    chatRoom = models.ForeignKey(ChatRoom, related_name='messages', on_delete=models.CASCADE, verbose_name="ChatRoom", null=True)
+    chatRoom = models.ForeignKey(ChatRoom, default=1, related_name='messages', on_delete=models.CASCADE, verbose_name="ChatRoom")
      #chatRoom = models.OneToOneField(ChatRoom, default=None, on_delete=models.CASCADE, null=True)
 
 # class UserChatRoomMembership(models.Model):

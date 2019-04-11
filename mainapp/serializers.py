@@ -14,6 +14,10 @@ class ChatRoomSerializer(serializers.ModelSerializer):
     # def get_messages_ids(self, chatRoom):
     #     queryset = Message.objects.filter(chatRoom_id=chatRoom.id)
     #     return queryset
+
+    # def update(self, instance, validated_data):
+    #     print(validated_data)
+    #     return super().update(instance, validated_data)
     
 
     def get_users(self, chatRoom):
@@ -36,10 +40,11 @@ class UserSerializer(serializers.ModelSerializer):
     
     def get_chatRooms(self, user):
         #queryset = ChatRoom.objects.filter(id__in=user.chatRooms.id)
-        queryset = ChatRoom.objects.filter(id__in=user.chatRooms.values_list('id'))
+        #queryset = ChatRoom.objects.filter(id__in=user.chatRooms.values_list('id'))
         #queryset = ChatRoom.objects.filter(id__in=[item.id for item in user.chatRooms.objects.all()])
         #queryset = ChatRoom.objects.all()
-        return [item.id for item in user.chatRooms.all()]
+        # return [item.id for item in user.chatRooms.all()]
+        return list(user.chatRooms.values_list('id', flat=True))
         
 
     # def get_messages(self, user):
