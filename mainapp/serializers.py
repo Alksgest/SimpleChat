@@ -21,9 +21,6 @@ class ChatRoomSerializer(ChatRoomBaseSerializer):
         model = ChatRoom
         fields = ('id', 'messages', 'users', 'title') 
         
-    def get_users(self, chatRoom):
-        return [item.id for item in chatRoom.users.all()]
-
 
 class ChatRoomAddUserSerializer(ChatRoomBaseSerializer):
 
