@@ -30,6 +30,7 @@ class ChatRoomAddUserSerializer(ChatRoomBaseSerializer):
         try:
             user = User.objects.get(id=userID)
             instance.users.add(user)
+            #instance.users.save()
         except ObjectDoesNotExist: 
             pass
 
@@ -41,7 +42,8 @@ class ChatRoomDeleteUserSerializer(ChatRoomBaseSerializer):
     def update(self, instance, validate_data):
         userID = self.context['request'].data.get('userID', -1)
         try:
-            instance.users.filter(id=userID).delete()
+            user = User.objects.get(id=userID)
+            instance.users.remove(user)
         except ObjectDoesNotExist: 
             pass
 

@@ -53,7 +53,7 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
         if action == 'add':
             return Action.ADD
         elif action == 'delete':
-            return Action.ADD
+            return Action.DELETE
         return Action.ERROR
     
     def get_serializer_class(self):
