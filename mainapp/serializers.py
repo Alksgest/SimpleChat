@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .models import ChatRoom, Message, User
 
+
 class ChatRoomBaseSerializer(serializers.ModelSerializer):
     users = serializers.SerializerMethodField()
 
@@ -15,23 +16,24 @@ class ChatRoomBaseSerializer(serializers.ModelSerializer):
 
 
 class ChatRoomSerializer(ChatRoomBaseSerializer):
-    messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.all())
- 
+    messages = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Message.objects.all())
+
     class Meta:
         model = ChatRoom
-        fields = ('id', 'messages', 'users', 'title') 
-        
+        fields = ('id', 'messages', 'users', 'title')
+
 
 class ChatRoomAddUserSerializer(ChatRoomBaseSerializer):
 
     def update(self, instance, validate_data):
         userID = self.context['request'].data.get('userID', -1)
-        
+
         try:
             user = User.objects.get(id=userID)
             instance.users.add(user)
-            #instance.users.save()
-        except ObjectDoesNotExist: 
+            # instance.users.save()
+        except ObjectDoesNotExist:
             pass
 
         return super().update(instance, validate_data)
@@ -44,30 +46,29 @@ class ChatRoomDeleteUserSerializer(ChatRoomBaseSerializer):
         try:
             user = User.objects.get(id=userID)
             instance.users.remove(user)
-        except ObjectDoesNotExist: 
+        except ObjectDoesNotExist:
             pass
 
         return super().update(instance, validate_data)
 
 
 class UserSerializer(serializers.ModelSerializer):
-    messages = serializers.PrimaryKeyRelatedField(many=True, queryset=Message.objects.all()) #
+    messages = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Message.objects.all())
     chatRooms = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'chatRooms', 'messages',) # ,   
-    
+        fields = ('id', 'username', 'chatRooms', 'messages',)  # ,
+
     def get_chatRooms(self, user):
         return list(user.chatRooms.values_list('id', flat=True))
-        
+
 
 class MessageSerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.id')
     chatRoom = serializers.ReadOnlyField(source='chatRoom.id')
 
-
     class Meta:
         model = Message
         fields = ('id', 'owner', 'chatRoom', 'date', 'message')
-

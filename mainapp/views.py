@@ -1,3 +1,5 @@
+from enum import Enum
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.http import (HttpResponse, HttpResponseNotFound,
@@ -13,8 +15,6 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import GenericViewSet
 
-from enum import Enum
-
 from .models import *
 from .permissions import *
 from .serializers import *
@@ -29,7 +29,6 @@ def api_root(request, format=None):
     })
 
 
-
 class ChatRoomList(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
@@ -37,7 +36,7 @@ class ChatRoomList(generics.ListCreateAPIView):
 
 class Action(Enum):
     ADD = 1,
-    DELETE = 2, 
+    DELETE = 2,
     ERROR = 3
 
 
@@ -48,6 +47,7 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
     "action": "add" | "delete"
     "userID': int
     """
+
     def _is_retrieve_request(self):
         action = self.request.data.get('action', '')
         if action == 'add':
@@ -55,16 +55,16 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
         elif action == 'delete':
             return Action.DELETE
         return Action.ERROR
-    
+
     def get_serializer_class(self):
         res = self._is_retrieve_request()
         if res == Action.ADD:
             return ChatRoomAddUserSerializer
         elif res == Action.DELETE:
             return ChatRoomDeleteUserSerializer
-        return ChatRoomSerializer #mb ChatRoomErrorSerializer
+        return ChatRoomSerializer  # mb ChatRoomErrorSerializer
 
-    def get_object(self):  
+    def get_object(self):
         return get_object_or_404(ChatRoom, id=self.kwargs['pk'])
 
     def get_serializer_context(self):
@@ -74,7 +74,7 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-  
+
 
 class UserDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
@@ -90,12 +90,12 @@ class MessageList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    
+
 class MessageDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = (IsOwner, )
-    
+
 
 class ChatRoomRedirect(generics.GenericAPIView):
 
@@ -103,7 +103,7 @@ class ChatRoomRedirect(generics.GenericAPIView):
 
         title = request.GET.get('title', '')
         password = request.GET.get('password', '')
-        
+
         if title != '':
             try:
                 chatObj = ChatRoom.objects.get(title=title)
@@ -116,5 +116,5 @@ class ChatRoomRedirect(generics.GenericAPIView):
             except:
                 return HttpResponseServerError('invalid password')
             return HttpResponsePermanentRedirect(f'/api/chatRooms/{chatObj.id}')
-            
+
         return HttpResponseServerError('invalid request')
