@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import GenericViewSet
 
+from enum import Enum
+
 from .models import *
 from .permissions import *
 from .serializers import *
@@ -33,21 +35,34 @@ class ChatRoomList(generics.ListCreateAPIView):
     serializer_class = ChatRoomSerializer
 
 
+class Action(Enum):
+    ADD = 1,
+    DELETE = 2, 
+    ERROR = 3
+
+
 class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
-    
     """
     headers:
     "action": "add" | "delete"
     "userID': int
     """
     def _is_retrieve_request(self):
-        return 'add' == self.request.data.get('action', '')
+        action = self.request.data.get('action', '')
+        if action == 'add':
+            return Action.ADD
+        elif action == 'delete':
+            return Action.ADD
+        return Action.ERROR
     
     def get_serializer_class(self):
-        if self._is_retrieve_request():
+        res = self._is_retrieve_request()
+        if res == Action.ADD:
             return ChatRoomAddUserSerializer
-        return ChatRoomDeleteUserSerializer
+        elif res == Action.DELETE:
+            return ChatRoomDeleteUserSerializer
+        return ChatRoomSerializer #mb ChatRoomErrorSerializer
 
     def get_object(self):  
         return get_object_or_404(ChatRoom, id=self.kwargs['pk'])
