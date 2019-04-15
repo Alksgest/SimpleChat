@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 
 from .models import ChatRoom, Message, User
+from .constants import MAX_USER_COUNT
 
 
 class ChatRoomBaseSerializer(serializers.ModelSerializer):
@@ -31,9 +32,15 @@ class ChatRoomAddUserSerializer(ChatRoomBaseSerializer):
 
         try:
             user = User.objects.get(id=userID)
-            instance.users.add(user)
-            # instance.users.save()
+            if not user in instance.users.all() and instance.users.all().count() < MAX_USER_COUNT: #mb add 2 custom Exception classes
+                instance.users.add(user)
+                # instance.users.save()
+            else:
+                raise Exception
+
         except ObjectDoesNotExist:
+            pass
+        except Exception:
             pass
 
         return super().update(instance, validate_data)
@@ -45,7 +52,8 @@ class ChatRoomDeleteUserSerializer(ChatRoomBaseSerializer):
         userID = self.context['request'].data.get('userID', -1)
         try:
             user = User.objects.get(id=userID)
-            instance.users.remove(user)
+            if user in instance.usesrs.all():
+                instance.users.remove(user)
         except ObjectDoesNotExist:
             pass
 

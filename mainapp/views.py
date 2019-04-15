@@ -15,9 +15,9 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import GenericViewSet
 
-from .models import *
-from .permissions import *
-from .serializers import *
+from .models import Message, User, ChatRoom
+from .permissions import IsOwnerOrReadOnly, IsMember
+from .serializers import ChatRoomSerializer, ChatRoomAddUserSerializer, ChatRoomDeleteUserSerializer, UserSerializer, MessageSerializer
 
 
 @api_view(['GET'])
@@ -32,16 +32,20 @@ def api_root(request, format=None):
 class ChatRoomList(generics.ListCreateAPIView):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
+    permission_classes = (permissions.IsAdminUser, )
 
 
 class Action(Enum):
     ADD = 1,
     DELETE = 2,
-    ERROR = 3
+    OTHER = 3,
+    ERROR = -1
 
 
 class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
+    permission_classes = (permissions.IsAdminUser, IsMember)
+
     """
     headers:
     "action": "add" | "delete"
@@ -54,7 +58,7 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
             return Action.ADD
         elif action == 'delete':
             return Action.DELETE
-        return Action.ERROR
+        return Action.OTHER
 
     def get_serializer_class(self):
         res = self._is_retrieve_request()
@@ -74,6 +78,7 @@ class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAdminUser, )
 
 
 class UserDetails(generics.RetrieveUpdateDestroyAPIView):
@@ -85,7 +90,7 @@ class UserDetails(generics.RetrieveUpdateDestroyAPIView):
 class MessageList(generics.ListCreateAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = (IsOwner, )
+    permission_classes = (IsOwnerOrReadOnly, )
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -94,7 +99,7 @@ class MessageList(generics.ListCreateAPIView):
 class MessageDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = (IsOwner, )
+    permission_classes = (IsOwnerOrReadOnly, )
 
 
 class ChatRoomRedirect(generics.GenericAPIView):
