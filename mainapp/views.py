@@ -17,13 +17,14 @@ from rest_framework.viewsets import GenericViewSet
 
 from .models import Message, User, ChatRoom
 from .permissions import IsOwnerOrReadOnly, IsMember
-from .serializers import ChatRoomSerializer, ChatRoomAddUserSerializer, ChatRoomDeleteUserSerializer, UserSerializer, MessageSerializer
+from .serializers import ChatRoomSerializer, ChatRoomAddUserSerializer, ChatRoomDeleteUserSerializer, UserSerializer, MessageSerializer, ChatRoomPostMessageSerializer
 
 
 @api_view(['GET'])
 def api_root(request, format=None):
     return Response({
         'chatRooms': reverse('chatroom-list', request=request, format=format),
+        #'chatRoomAction': reverse('chatroom-action', request=request, format=format),
         'users': reverse('user-list', request=request, format=format),
         'messages': reverse('message-list', request=request, format=format),
     })
@@ -35,41 +36,31 @@ class ChatRoomList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAdminUser, )
 
 
-class Action(Enum):
-    ADD = 1,
-    DELETE = 2,
-    OTHER = 3,
-    ERROR = -1
-
-
 class ChatRoomDetails(generics.RetrieveUpdateDestroyAPIView):
     queryset = ChatRoom.objects.all()
     permission_classes = (permissions.IsAdminUser, IsMember)
-
-    """
-    headers:
-    "action": "add" | "delete"
-    "userID': int
-    """
-
-    def _is_retrieve_request(self):
-        action = self.request.data.get('action', '')
-        if action == 'add':
-            return Action.ADD
-        elif action == 'delete':
-            return Action.DELETE
-        return Action.OTHER
-
-    def get_serializer_class(self):
-        res = self._is_retrieve_request()
-        if res == Action.ADD:
-            return ChatRoomAddUserSerializer
-        elif res == Action.DELETE:
-            return ChatRoomDeleteUserSerializer
-        return ChatRoomSerializer  # mb ChatRoomErrorSerializer
+    serializer_class = ChatRoomSerializer
 
     def get_object(self):
         return get_object_or_404(ChatRoom, id=self.kwargs['pk'])
+
+
+class ChatRoomAction(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ChatRoom.objects.all()
+    permission_classes = (permissions.IsAdminUser, ) #IsMember
+
+    def _is_retrieve_request(self):
+        return self.request.data.get('action', '')
+
+    def get_serializer_class(self):
+        res = self._is_retrieve_request()
+        if res == 'add':
+            return ChatRoomAddUserSerializer
+        elif res == 'delete':
+            return ChatRoomDeleteUserSerializer
+        elif res == 'post_message':
+            return ChatRoomPostMessageSerializer
+        return ChatRoomSerializer  # mb ChatRoomErrorSerializer
 
     def get_serializer_context(self):
         return {'request': self.request}
